@@ -25,11 +25,11 @@ def obtener_clientes():
     return jsonify(resultado), 200
 
 # =========================
-#  Obtener cliente por ID
+#  Obtener cliente por codigo
 # =========================
-@clientes.route("/clientes/<int:id>", methods=["GET"])
-def obtener_cliente(id):
-    cliente = Cliente.query.get(id)
+@clientes.route("/clientes/<string:codigo_cliente>", methods=["GET"])
+def obtener_cliente(codigo_cliente):
+    cliente = Cliente.query.filter_by(codigo_cliente=codigo_cliente).first()
     if not cliente:
         return jsonify({"error": "Cliente no encontrado"}), 404
 
@@ -41,6 +41,32 @@ def obtener_cliente(id):
         "correo_contacto": cliente.correo_contacto,
         "telefono_contacto": cliente.telefono_contacto,
     }
+    return jsonify(resultado), 200
+
+# =========================
+#  Obtener cliente con campos específicos
+# =========================
+@clientes.route("/clientes/<string:codigo_cliente>/", methods=["GET"])
+def obtener_cliente_campos(codigo_cliente):
+    # Buscar cliente
+    cliente = Cliente.query.filter_by(codigo_cliente=codigo_cliente).first()
+    if not cliente:
+        return jsonify({"error": "Cliente no encontrado"}), 404
+
+    # Obtener los campos solicitados en query params
+    fields_param = request.args.get("fields")
+    if not fields_param:
+        return jsonify({"error": "Debes indicar los campos en el parámetro 'fields'"}), 400
+
+    requested_fields = [f.strip() for f in fields_param.split(",")]
+
+    resultado = {}
+    for field in requested_fields:
+        if hasattr(cliente, field):
+            resultado[field] = getattr(cliente, field)
+        else:
+            resultado[field] = None  # o podrías devolver un error si prefieres
+
     return jsonify(resultado), 200
 
 # =========================

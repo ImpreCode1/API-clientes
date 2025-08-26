@@ -17,15 +17,22 @@ def obtener_clientes():
             "codigo_cliente": c.codigo_cliente,
             "nombre_cliente": c.nombre_cliente,
             "grupo": c.grupo,
+            "nombre_vendedor": c.nombre_vendedor,
+            "codigo_vendedor": c.codigo_vendedor,
             "correo_contacto": c.correo_contacto,
             "telefono_contacto": c.telefono_contacto,
+            "celular_contacto": c.celular_contacto,
+            "poblacion": c.poblacion,
+            "calle": c.calle,
+            "fecha_creacion": c.fecha_creacion.isoformat() if c.fecha_creacion else None,
+            "tipo_cliente": c.tipo_cliente,
         }
         for c in clientes
     ]
     return jsonify(resultado), 200
 
 # =========================
-#  Obtener cliente por codigo
+#  Obtener cliente por codigo (con campos importantes o fields opcional)
 # =========================
 @clientes.route("/clientes/<string:codigo_cliente>", methods=["GET"])
 def obtener_cliente(codigo_cliente):
@@ -33,14 +40,41 @@ def obtener_cliente(codigo_cliente):
     if not cliente:
         return jsonify({"error": "Cliente no encontrado"}), 404
 
-    resultado = {
-        "id": cliente.id,
-        "codigo_cliente": cliente.codigo_cliente,
-        "nombre_cliente": cliente.nombre_cliente,
-        "grupo": cliente.grupo,
-        "correo_contacto": cliente.correo_contacto,
-        "telefono_contacto": cliente.telefono_contacto,
-    }
+    # Lista de campos importantes por defecto
+    default_fields = [
+        "id",
+        "codigo_cliente",
+        "nombre_cliente",
+        "grupo",
+        "nombre_vendedor",
+        "codigo_vendedor",
+        "correo_contacto",
+        "telefono_contacto",
+        "celular_contacto",
+        "poblacion",
+        "calle",
+        "fecha_creacion",
+        "tipo_cliente",
+    ]
+
+    # Si vienen fields en query params, usamos esos
+    fields_param = request.args.get("fields")
+    if fields_param:
+        requested_fields = [f.strip() for f in fields_param.split(",")]
+    else:
+        requested_fields = default_fields
+
+    resultado = {}
+    for field in requested_fields:
+        if hasattr(cliente, field):
+            value = getattr(cliente, field)
+            # Convertir fecha a string ISO
+            if isinstance(value, (db.Date, )):
+                value = value.isoformat() if value else None
+            resultado[field] = value
+        else:
+            resultado[field] = None  # puedes cambiarlo a error 400 si prefieres
+
     return jsonify(resultado), 200
 
 # =========================

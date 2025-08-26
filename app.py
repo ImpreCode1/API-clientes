@@ -3,6 +3,7 @@ from flask import Flask
 from config import Config
 from extensions import db
 from routes.clientes import clientes
+from routes.auth import auth
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -12,6 +13,7 @@ with app.app_context():
     db.create_all()  # Esto crea las tablas si no existen
 
 app.register_blueprint(clientes)
+app.register_blueprint(auth)
 
 @app.route("/")
 def home():

@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 from models.cliente import Cliente, db
 import pandas as pd
 import io
+from utils.utils import token_requerido
 
 clientes = Blueprint("clientes", __name__)
 
@@ -9,6 +10,7 @@ clientes = Blueprint("clientes", __name__)
 #  Obtener todos los clientes
 # =========================
 @clientes.route("/clientes", methods=["GET"])
+@token_requerido
 def obtener_clientes():
     clientes = Cliente.query.all()
     resultado = [
@@ -35,6 +37,7 @@ def obtener_clientes():
 #  Obtener cliente por codigo (con campos importantes o fields opcional)
 # =========================
 @clientes.route("/clientes/<string:codigo_cliente>", methods=["GET"])
+@token_requerido
 def obtener_cliente(codigo_cliente):
     cliente = Cliente.query.filter_by(codigo_cliente=codigo_cliente).first()
     if not cliente:
@@ -81,6 +84,7 @@ def obtener_cliente(codigo_cliente):
 #  Obtener cliente con campos específicos
 # =========================
 @clientes.route("/clientes/<string:codigo_cliente>/", methods=["GET"])
+@token_requerido
 def obtener_cliente_campos(codigo_cliente):
     # Buscar cliente
     cliente = Cliente.query.filter_by(codigo_cliente=codigo_cliente).first()
@@ -107,6 +111,7 @@ def obtener_cliente_campos(codigo_cliente):
 #  Crear cliente manualmente
 # =========================
 @clientes.route("/clientes", methods=["POST"])
+@token_requerido
 def crear_cliente():
     data = request.get_json()
     try:
@@ -122,6 +127,7 @@ def crear_cliente():
 #  Actualizar cliente
 # =========================
 @clientes.route("/clientes/<int:id>", methods=["PUT"])
+@token_requerido
 def actualizar_cliente(id):
     cliente = Cliente.query.get(id)
     if not cliente:
@@ -138,6 +144,7 @@ def actualizar_cliente(id):
 #  Eliminar cliente
 # =========================
 @clientes.route("/clientes/<int:id>", methods=["DELETE"])
+@token_requerido
 def eliminar_cliente(id):
     cliente = Cliente.query.get(id)
     if not cliente:
@@ -148,34 +155,10 @@ def eliminar_cliente(id):
     return jsonify({"mensaje": "Cliente eliminado exitosamente"}), 200
 
 # =========================
-#  Buscar clientes (por código, nombre, grupo, etc.)
-# =========================
-@clientes.route("/clientes/buscar", methods=["GET"])
-def buscar_clientes():
-    query = request.args.get("q", "").lower()
-    clientes = Cliente.query.filter(
-        (Cliente.codigo_cliente.ilike(f"%{query}%")) |
-        (Cliente.nombre_cliente.ilike(f"%{query}%")) |
-        (Cliente.grupo.ilike(f"%{query}%"))
-    ).all()
-
-    resultado = [
-        {
-            "id": c.id,
-            "codigo_cliente": c.codigo_cliente,
-            "nombre_cliente": c.nombre_cliente,
-            "grupo": c.grupo,
-            "correo_contacto": c.correo_contacto,
-            "telefono_contacto": c.telefono_contacto,
-        }
-        for c in clientes
-    ]
-    return jsonify(resultado), 200
-
-# =========================
 #  Importar clientes desde Excel
 # =========================
 @clientes.route("/clientes/importar", methods=["POST"])
+@token_requerido
 def importar_clientes():
     file = request.files.get("file")
     if not file:
@@ -308,6 +291,7 @@ def importar_clientes():
 #  Exportar clientes a Excel
 # =========================
 @clientes.route("/clientes/exportar", methods=["GET"])
+@token_requerido
 def exportar_clientes():
     clientes = Cliente.query.all()
     data = [

@@ -1,4 +1,3 @@
-
 from flask import Flask
 from app.config import Config
 from app.extensions import db
@@ -15,9 +14,11 @@ with app.app_context():
 app.register_blueprint(clientes)
 app.register_blueprint(auth)
 
+
 @app.route("/")
 def home():
     return {"msg": "API de Clientes corriendo"}
 
+
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=True)

@@ -1,8 +1,8 @@
 from flask import Blueprint, request, jsonify
-from models.cliente import Cliente, db
+from app.models.cliente import Cliente, db
 import pandas as pd
 import io
-from utils.utils import token_requerido
+from app.utils.utils import token_requerido
 
 clientes = Blueprint("clientes", __name__)
 

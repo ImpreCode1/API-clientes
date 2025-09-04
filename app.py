@@ -1,9 +1,9 @@
 
 from flask import Flask
-from config import Config
-from extensions import db
-from routes.clientes import clientes
-from routes.auth import auth
+from app.config import Config
+from app.extensions import db
+from app.routes.clientes import clientes
+from app.routes.auth import auth
 
 app = Flask(__name__)
 app.config.from_object(Config)

@@ -235,10 +235,10 @@ def importar_clientes():
         clientes = []
         filas_invalidas = []
 
-        for index, row in df.iterrows():
+        for idx, (index, row) in enumerate(df.iterrows()):
             cliente_data = {}
             for excel_col, db_col in excel_to_db.items():
-                value = row.get(excel_col)
+                value = row[excel_col] if excel_col in row else None
 
                 # Convertir NaN a None
                 if pd.isna(value):
@@ -267,10 +267,11 @@ def importar_clientes():
 
             # Validar que código_cliente no sea None
             if not cliente_data.get("codigo_cliente"):
-                filas_invalidas.append(index + 2)  # +2 porque Excel empieza en 1 y encabezado
+                filas_invalidas.append(idx + 2)  # idx = 0 en la primera fila de datos
                 continue
 
             clientes.append(Cliente(**cliente_data))
+
 
         # Insertar en la DB
         db.session.add_all(clientes)
